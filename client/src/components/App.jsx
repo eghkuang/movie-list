@@ -1,6 +1,6 @@
 import React from 'react';
 
-var movies = [
+const MOVIES = [
   {title: 'Mean Girls'},
   {title: 'Hackers'},
   {title: 'The Grey'},
@@ -8,32 +8,24 @@ var movies = [
   {title: 'Ex Machina'},
 ];
 
-const App = (props) => (
-  <div>
-    <div>Hello World!</div>
-      <ul>mean gorls</ul>
-      <ul>Hackers</ul>
-      <ul>The Grey</ul>
-      <ul>Sunshine</ul>
-      <ul>Ex Machina</ul>
-  </div>
-);
-
 //-------------- using class ------------------
-
-class App = ( props ) => {
+class App extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      searchedMovie: '';
-      movieList: movie;
+      searchedMovie: '',
+      movies: [],
+      visibleMovies: []
     }
 
 
-    this.handleChange = this.handleChange.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
+  componentDidMount() {
+    this.setState({movies: MOVIES, visibleMovies: MOVIES})
   }
 
   handleSearch(event) {
@@ -42,24 +34,42 @@ class App = ( props ) => {
 
 
   handleSubmit(event) {
-    this.setState({
-      movieList: //should be a list of movies with the searchedMovie keyword. need to make movieList
-    })
+    event.preventDefault();
+    this.filterList()
   }
 
+  filterList() {
+    var filteredList = [];
+    var {movies, searchedMovie} = this.state
+    searchedMovie = searchedMovie.toLowerCase();
+    movies.forEach((movie) => {
+      var title = movie.title.toLowerCase();
+      if (title.includes(searchedMovie)) {
+        filteredList.push(movie);
+      }
+    })
+    this.setState({visibleMovies: filteredList})
+  }
+
+
   render () {
+    const renderList = () => (
+      this.state.visibleMovies.map(({ title }) => (
+          <li>{title}</li>
+        ))
+    )
     return (
       <div>
-        <nav className="searchBar">
-          <div><Search handleSearch={this.handleChange} handleSubmit={this.handleSubmit}/></div>
-        </nav>
+        <h2>Movie List</h2>
+          <input type="text" className="searchBar" onChange={this.handleSearch} placeholder="Search movie here!"/>
+          <button type="submit" onClick={(event) => {this.handleSubmit(event)}}>Submit</button>
+        <ul>
+          {renderList()}
+        </ul>
       </div>
     )
   }
 }
-
-
-
 
 
 export default App;

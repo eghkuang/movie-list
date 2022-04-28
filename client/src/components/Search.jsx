@@ -9,7 +9,7 @@ var Search = (props) => (
   <div>
     <form>
         <input className="searchBar" onChange={(event) => {props.handleSearch(event)}} placeholder="Search movie here!"></input>
-        <input className="searchMovie" type="submit" onClick={(event) => {props.submitSearch(event)}} value="Search movie here!"></input>
+        <input className="searchMovie" type="submit" onClick={(event) => {props.handleSubmit(event)}} value="Search movie here!"></input>
     </form>
   </div>
 )
