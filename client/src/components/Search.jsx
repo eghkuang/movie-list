@@ -5,12 +5,10 @@
 
 import React from 'react';
 
-var Search = (props) => (
+var Search = ({ handleSearch, handleSubmit }) => (
   <div>
-    <form>
-        <input className="searchBar" onChange={(event) => {props.handleSearch(event)}} placeholder="Search movie here!"></input>
-        <input className="searchMovie" type="submit" onClick={(event) => {props.handleSubmit(event)}} value="Search movie here!"></input>
-    </form>
+      <input type="text" className="searchBar" onChange={() => handleSearch(event)} placeholder="Search movie here!"/>
+      <button type="submit" onClick={() => handleSubmit()}>Search</button>
   </div>
 )
 
