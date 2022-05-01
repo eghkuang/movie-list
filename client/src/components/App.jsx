@@ -38,7 +38,6 @@ class App extends React.Component {
 
   handleSearch(event) {
     this.setState({ searchedMovie: event.target.value });
-    console.log(event.target.value)
   }
 
 
@@ -66,7 +65,6 @@ class App extends React.Component {
 
   handleText(event) {
     this.setState({ addedMovie: event.target.value });
-    console.log(event.target.value);
   }
 
   handleAdd(event) {
