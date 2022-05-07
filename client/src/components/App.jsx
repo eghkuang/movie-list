@@ -1,15 +1,16 @@
 import React from 'react';
 import Search from './Search.jsx'
 import AddMovie from './AddMovie.jsx'
+import axios from 'axios'
 
-const MOVIES = [
-  {title: 'Mean Girls'},
-  {title: 'Hackers'},
-  {title: 'The Grey'},
-  {title: 'Sunshine'},
-  {title: 'Ex Machina'},
-  {title: 'The Room'},
-];
+// const MOVIES = [
+//   {title: 'Mean Girls'},
+//   {title: 'Hackers'},
+//   {title: 'The Grey'},
+//   {title: 'Sunshine'},
+//   {title: 'Ex Machina'},
+//   {title: 'The Room'},
+// ];
 
 //-------------- using class ------------------
 class App extends React.Component {
@@ -20,7 +21,10 @@ class App extends React.Component {
       searchedMovie: '',
       movies: [],
       addedMovie: '',
-      visibleMovies: []
+      visibleMovies: [],
+      watched: ''
+      // watchedMovies: [],
+      // unwatchedMovies: []
     }
 
 
@@ -28,75 +32,132 @@ class App extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleText = this.handleText.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
+    this.handleWatch = this.handleWatch.bind(this);
+    // this.filterWatch = this.filterWatch.bind(this);
   }
 
-  componentDidMount() {
-    this.setState({movies: MOVIES, visibleMovies: MOVIES})
-  }
+    componentDidMount() {
+      // this.setState({movies: MOVIES, visibleMovies: MOVIES})
+      // this.setState({movies: , visibleMovies: })
+      axios.get('/allMovies')
+        .then((response) => {
+          console.log('response data', response.data);
+          this.setState({movies: response.data, visibleMovies: response.data})
+        });
+    }
 
-  // -----search-------
+    // -----search-------
 
-  handleSearch(event) {
-    this.setState({ searchedMovie: event.target.value });
-  }
-
-
-  handleSubmit(event) {
-    this.filterList(event);
-  }
-
-  filterList() {
-    var filteredList = [];
-    var {movies, searchedMovie} = this.state
-    searchedMovie = searchedMovie.toLowerCase();
-    movies.forEach((movie) => {
-      var title = movie.title.toLowerCase();
-      if (title.includes(searchedMovie)) {
-        filteredList.push(movie);
-      }
-    })
-    this.setState({visibleMovies: filteredList})
-  }
+    handleSearch(event) {
+      this.setState({ searchedMovie: event.target.value });
+    }
 
 
-  // -----addMovie-------
-  // Add an input field for users to add movies.
-  // Display only user added movies, not the hardcoded data.
+    handleSubmit(event) {
+      this.filterList(event);
+    }
 
-  handleText(event) {
-    this.setState({ addedMovie: event.target.value });
-  }
+    filterList() {
+      var filteredList = [];
+      var {movies, searchedMovie} = this.state
+      searchedMovie = searchedMovie.toLowerCase();
+      movies.forEach((movie) => {
+        var title = movie.title.toLowerCase();
+        if (title.includes(searchedMovie)) {
+          filteredList.push(movie);
+        }
+      })
+      this.setState({visibleMovies: filteredList})
+    }
 
-  handleAdd(event) {
-    var adding = {title: this.state.addedMovie, watched: false};
-    this.setState({
-      visibleMovies: [adding, ...this.state.visibleMovies],
-      movies: [adding, ...this.state.movies]
 
-    })
-  }
+    // -----addMovie-------
+    // Add an input field for users to add movies.
+    // Display only user added movies, not the hardcoded data.
+
+    handleText(event) {
+      this.setState({ addedMovie: event.target.value });
+    }
+
+    handleAdd(event) {
+      axios.post('/addMovie', {
+        title: this.state.addedMovie,
+        watched: 'Watched'
+      })
+        .then((response) => {
+          // console.log('MORE response data', response.data);
+          // console.log('MORE addedMovie', this.state.addedMovie);
+          // console.log('MORE movie', this.state.movies);
+
+          var adding = {title: this.state.addedMovie, watched: 0};
+          // console.log('maybe?', this.state.movies.includes(this.state.addedMovie))
+          if (this.state.movies.includes(this.state.addedMovie)) {
+            return;
+          } else {
+            this.setState({
+              visibleMovies: [...this.state.visibleMovies, adding],
+              movies: [...this.state.movies, adding]
+              //can you still reach state even though we move this data to DB/index?
+            })
+          }
+      });
+    }
+
+    //-------watched toggle property---------
+    //Add a button to each list item that allows the user to toggle a 'watched' property.
+    handleWatch() {
+      // this.state.watched ? 'Watched' : 'Watch';
+      // this.setState({this.state.watched ? 'Watched' : 'Watch'});
+      axios.put()
+      console.log(this.state.watched)
+    }
 
 
-  render () {
-    const renderList = () => (
-      this.state.visibleMovies.map(({ title }) => (
-          <li>{title}</li>
-        ))
-    )
-    return (
-      <div>
+
+    // //-------watchList--------
+    // handleWatch(event) {
+    //   this.filterWatch(event);
+    // }
+
+    // filterWatch() {
+    //   var watchList = [];
+    //   var {movies, searchedMovie} = this.state
+    //   // searchedMovie = searchedMovie.toLowerCase();
+    //   movies.forEach((movie) => {
+    //     var watched = movie.watched.toLowerCase();
+    //     if (watched.includes('watched')) {
+    //       filteredList.push(movie);
+    //     }
+    //   })
+    //   this.setState({visibleMovies: watchList})
+    // }
+
+
+
+    render () {
+      const renderList = () => (
+        this.state.visibleMovies.map(({ title, watched }) => (
+          <li>{title}
+            <button onlClick={() => handleWatch()}>{watched === 'Watched' ? 'Watched' : 'Watch'}</button>
+          </li>
+          ))
+        )
+      return (
+            <div>
         <h2>Movie List</h2>
         <ul>
           <div>
             <AddMovie handleText={this.handleText} handleAdd={this.handleAdd}/>
+            <Search handleSearch={this.handleSearch} handleSubmit={this.handleSubmit}/>
+            {/* <WatchedList handleWatch={this.handleWatch}/> */}
           </div>
         </ul>
 
-        <ul>
-          <div>
-            <Search handleSearch={this.handleSearch} handleSubmit={this.handleSubmit}/>
-          </div>
-        </ul>
+
+        {/* <div>
+          <WatchedList handleSearch={this.handleSearch} handleSubmit={this.handleSubmit}/>
+        </div> */}
+
 
         <ul>
           <div className="movieList">
