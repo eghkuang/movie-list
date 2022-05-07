@@ -28,17 +28,22 @@ class App extends React.Component {
     }
 
 
+    this.getMovies = this.getMovies.bind(this);
     this.handleSearch = this.handleSearch.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleText = this.handleText.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
-    this.handleWatch = this.handleWatch.bind(this);
+    this.handleWatchClick = this.handleWatchClick.bind(this);
     // this.filterWatch = this.filterWatch.bind(this);
   }
 
     componentDidMount() {
       // this.setState({movies: MOVIES, visibleMovies: MOVIES})
       // this.setState({movies: , visibleMovies: })
+      this.getMovies();
+    }
+
+    getMovies() {
       axios.get('/allMovies')
         .then((response) => {
           console.log('response data', response.data);
@@ -82,7 +87,7 @@ class App extends React.Component {
     handleAdd(event) {
       axios.post('/addMovie', {
         title: this.state.addedMovie,
-        watched: 'Watched'
+        watched: 'Not Watched'
       })
         .then((response) => {
           // console.log('MORE response data', response.data);
@@ -105,11 +110,13 @@ class App extends React.Component {
 
     //-------watched toggle property---------
     //Add a button to each list item that allows the user to toggle a 'watched' property.
-    handleWatch() {
-      // this.state.watched ? 'Watched' : 'Watch';
+    handleWatchClick(title) {
       // this.setState({this.state.watched ? 'Watched' : 'Watch'});
-      axios.put()
-      console.log(this.state.watched)
+      console.log('title', title);
+      axios.put('/watchStatus', {title: title, watched: 'Watched' ? 'Watched' : 'Watch'})
+        .then((response) => {
+          this.getMovies();
+        })
     }
 
 
@@ -138,7 +145,7 @@ class App extends React.Component {
       const renderList = () => (
         this.state.visibleMovies.map(({ title, watched }) => (
           <li>{title}
-            <button onlClick={() => handleWatch()}>{watched === 'Watched' ? 'Watched' : 'Watch'}</button>
+            <button onClick={() => this.handleWatchClick(title)}>{watched === 'Watched' ? 'Watched' : 'Watch'}</button>
           </li>
           ))
         )
@@ -150,6 +157,8 @@ class App extends React.Component {
             <AddMovie handleText={this.handleText} handleAdd={this.handleAdd}/>
             <Search handleSearch={this.handleSearch} handleSubmit={this.handleSubmit}/>
             {/* <WatchedList handleWatch={this.handleWatch}/> */}
+            <button>Watched</button>
+            <button>To Watch</button>
           </div>
         </ul>
 

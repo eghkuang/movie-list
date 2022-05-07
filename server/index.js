@@ -4,6 +4,8 @@ const PORT = 4000 || process.env.PORT;
 
 
 app.use(express.json());
+app.use(express.urlencoded({extended:true}));
+
 
 var db = require('./db');
 
@@ -13,7 +15,7 @@ app.use('/', express.static('client/dist'));
 app.get('/allMovies', (request, response)=> {
   console.log('hit route')
   db.query('SELECT * FROM movie;', (err, results) => {
-    console.log('results:', results);
+    console.log('requestbody:', request.body);
     if (err) {
       throw(err);
     } else {
@@ -36,10 +38,24 @@ app.post('/addMovie', (request, response) => {
   // response.send('no entry');
 })
 
+//{watched === 'Watched' ? 'Watched' : 'Watch'}
+
 app.put('/watchStatus', (request, response) => {
   let {id, title, watched} = request.body;
-  // db.query('UPDATE movie SET watched = ')
+  console.log('body', request.body);
+  db.query('UPDATE movie SET watched = ? WHERE title = ?', [watched, title], (err, results) => {
+    console.log('watched', watched);
+    console.log('title', title);
+    if (err) {
+      throw(err);
+    } else {
+      response.send(results)
+    }
+  });
 })
+
+// `UPDATE movies SET watched = !watched WHERE id = ${movie.ID}`
+// UPDATE table SET status = !status where id = ID passed in
 
 app.listen(PORT, () => {
   console.log(`Server listening on port: ${PORT}`);
