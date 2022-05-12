@@ -22,7 +22,8 @@ class App extends React.Component {
       movies: [],
       addedMovie: '',
       visibleMovies: [],
-      watched: ''
+      watched: '',
+      button: true
       // watchedMovies: [],
       // unwatchedMovies: []
     }
@@ -35,6 +36,7 @@ class App extends React.Component {
     this.handleAdd = this.handleAdd.bind(this);
     this.handleWatchClick = this.handleWatchClick.bind(this);
     // this.filterWatch = this.filterWatch.bind(this);
+    this.toggleButton = this.toggleButton.bind(this);
   }
 
     componentDidMount() {
@@ -44,7 +46,7 @@ class App extends React.Component {
     }
 
     getMovies() {
-      axios.get('/allMovies')
+      axios.get('/api/allMovies')
         .then((response) => {
           console.log('response data', response.data);
           this.setState({movies: response.data, visibleMovies: response.data})
@@ -85,7 +87,7 @@ class App extends React.Component {
     }
 
     handleAdd(event) {
-      axios.post('/addMovie', {
+      axios.post('/api/addMovie', {
         title: this.state.addedMovie,
         watched: 'Not Watched'
       })
@@ -110,34 +112,44 @@ class App extends React.Component {
 
     //-------watched toggle property---------
     //Add a button to each list item that allows the user to toggle a 'watched' property.
-    handleWatchClick(title) {
+    handleWatchClick(title, watched) {
       // this.setState({this.state.watched ? 'Watched' : 'Watch'});
       console.log('title', title);
-      axios.put('/watchStatus', {title: title, watched: 'Watched' ? 'Watched' : 'Watch'})
+      var watchedText = watched === 'Watched' ? 'Watch' : 'Watched';
+      axios.put('/api/watchStatus', {title: title, watched: watchedText})
         .then((response) => {
-          this.getMovies();
+          console.log('here')
+          this.state.visibleMovies.forEach((movie, index) => {
+            if (movie.title === title) {
+              movie.watched = watchedText;
+              this.state.visibleMovies.splice(index, 1, movie);
+              this.setState({visibleMovies: this.state.visibleMovies});
+            }
+          })
         })
     }
 
+    toggleButton() {
+      console.log('event')
+      this.setState({button: !this.state.button});
+    }
 
+    //-------watchList--------
+    handleWatchList(event) {
+      this.filterWatched();
+    }
 
-    // //-------watchList--------
-    // handleWatch(event) {
-    //   this.filterWatch(event);
-    // }
-
-    // filterWatch() {
-    //   var watchList = [];
-    //   var {movies, searchedMovie} = this.state
-    //   // searchedMovie = searchedMovie.toLowerCase();
-    //   movies.forEach((movie) => {
-    //     var watched = movie.watched.toLowerCase();
-    //     if (watched.includes('watched')) {
-    //       filteredList.push(movie);
-    //     }
-    //   })
-    //   this.setState({visibleMovies: watchList})
-    // }
+    filterWatched() {
+      var watchList = [];
+      var {movies, searchedMovie} = this.state
+      movies.forEach((movie) => {
+        var watched = movie.watched;
+        if (watched.includes('Watched')) {
+          watchList.push(movie);
+        }
+      })
+      this.setState({visibleMovies: watchList})
+    }
 
 
 
@@ -145,34 +157,29 @@ class App extends React.Component {
       const renderList = () => (
         this.state.visibleMovies.map(({ title, watched }) => (
           <li>{title}
-            <button onClick={() => this.handleWatchClick(title)}>{watched === 'Watched' ? 'Watched' : 'Watch'}</button>
+            <button onClick={() => this.handleWatchClick(title, watched)}>{watched === 'Watched' ? 'Watched' : 'Watch'}</button>
           </li>
           ))
         )
       return (
-            <div>
+      <div>
         <h2>Movie List</h2>
         <ul>
           <div>
             <AddMovie handleText={this.handleText} handleAdd={this.handleAdd}/>
             <Search handleSearch={this.handleSearch} handleSubmit={this.handleSubmit}/>
             {/* <WatchedList handleWatch={this.handleWatch}/> */}
-            <button>Watched</button>
+            <button onClick={this.handleWatchList}>Watched</button>
             <button>To Watch</button>
           </div>
         </ul>
-
-
-        {/* <div>
-          <WatchedList handleSearch={this.handleSearch} handleSubmit={this.handleSubmit}/>
-        </div> */}
-
 
         <ul>
           <div className="movieList">
             {renderList()}
           </div>
         </ul>
+        <button onClick={this.toggleButton}>{this.state.button ? 'on' : 'off'}</button>
       </div>
     )
   }
