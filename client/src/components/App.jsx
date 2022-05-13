@@ -24,8 +24,6 @@ class App extends React.Component {
       visibleMovies: [],
       watched: '',
       button: true
-      // watchedMovies: [],
-      // unwatchedMovies: []
     }
 
 
@@ -35,8 +33,13 @@ class App extends React.Component {
     this.handleText = this.handleText.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
     this.handleWatchClick = this.handleWatchClick.bind(this);
-    // this.filterWatch = this.filterWatch.bind(this);
+    this.handleWatchList = this.handleWatchList.bind(this);
+    this.filterWatched = this.filterWatched.bind(this);
+    this.handleToWatchList = this.handleToWatchList.bind(this);
+    this.filterToWatch = this.filterToWatch.bind(this);
+
     this.toggleButton = this.toggleButton.bind(this);
+
   }
 
     componentDidMount() {
@@ -91,30 +94,14 @@ class App extends React.Component {
         title: this.state.addedMovie,
         watched: 'Not Watched'
       })
-        .then((response) => {
-          // console.log('MORE response data', response.data);
-          // console.log('MORE addedMovie', this.state.addedMovie);
-          // console.log('MORE movie', this.state.movies);
-
-          var adding = {title: this.state.addedMovie, watched: 0};
-          // console.log('maybe?', this.state.movies.includes(this.state.addedMovie))
-          if (this.state.movies.includes(this.state.addedMovie)) {
-            return;
-          } else {
-            this.setState({
-              visibleMovies: [...this.state.visibleMovies, adding],
-              movies: [...this.state.movies, adding]
-              //can you still reach state even though we move this data to DB/index?
-            })
-          }
+        .then(() => {
+          this.getMovies();
       });
     }
 
     //-------watched toggle property---------
     //Add a button to each list item that allows the user to toggle a 'watched' property.
     handleWatchClick(title, watched) {
-      // this.setState({this.state.watched ? 'Watched' : 'Watch'});
-      console.log('title', title);
       var watchedText = watched === 'Watched' ? 'Watch' : 'Watched';
       axios.put('/api/watchStatus', {title: title, watched: watchedText})
         .then((response) => {
@@ -140,15 +127,33 @@ class App extends React.Component {
     }
 
     filterWatched() {
-      var watchList = [];
-      var {movies, searchedMovie} = this.state
+      var watchedList = [];
+      var {movies} = this.state
       movies.forEach((movie) => {
         var watched = movie.watched;
-        if (watched.includes('Watched')) {
-          watchList.push(movie);
+        if (watched === 'Watched') {
+          watchedList.push(movie);
         }
       })
-      this.setState({visibleMovies: watchList})
+      this.setState({visibleMovies: watchedList})
+    }
+
+    //------To Watch list----------
+
+    handleToWatchList(event) {
+      this.filterToWatch();
+    }
+
+    filterToWatch() {
+      var toWatchList = [];
+      var {movies} = this.state
+      movies.forEach((movie) => {
+        var watched = movie.watched;
+        if (watched !== 'Watched') {
+          toWatchList.push(movie);
+        }
+      })
+      this.setState({visibleMovies: toWatchList})
     }
 
 
@@ -168,9 +173,8 @@ class App extends React.Component {
           <div>
             <AddMovie handleText={this.handleText} handleAdd={this.handleAdd}/>
             <Search handleSearch={this.handleSearch} handleSubmit={this.handleSubmit}/>
-            {/* <WatchedList handleWatch={this.handleWatch}/> */}
             <button onClick={this.handleWatchList}>Watched</button>
-            <button>To Watch</button>
+            <button onClick={this.handleToWatchList}>To Watch</button>
           </div>
         </ul>
 
