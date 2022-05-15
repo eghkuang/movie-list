@@ -3,7 +3,7 @@ var db = require('./db');
 const express = require('express');
 
 const app = express();
-const PORT = 4000 || process.env.PORT;
+const PORT = 4500 || process.env.PORT;
 
 
 app.use(express.json());
@@ -13,7 +13,7 @@ app.use('/api', router);
 app.use('/', express.static('client/dist'));
 
 
-
+// app.use('/routes', router);
 // (request, response)=> {
 //   console.log('hit route')
 //   db.query('SELECT * FROM movie;', (err, results) => {

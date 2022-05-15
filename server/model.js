@@ -13,7 +13,7 @@ const model = {
       let {title, watched} = body;
       console.log('title:', title);
       console.log('watched:', watched);
-      db.query('INSERT INTO movie (title, watched) VALUES (?, ?)', [title, watched], function(err, fields) {
+      db.query('INSERT IGNORE INTO movie (title, watched) VALUES (?, ?)', [title, watched], function(err, fields) {
         callback(err, fields);
       });
     }, // a function which can be used to insert a message into the database
